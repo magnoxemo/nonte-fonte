@@ -1,0 +1,11 @@
+
+__pycache__/
+.idea
+*.xml
+*.h5
+*.out
+
+
+*.ipynb
+.ipynb_checkpoints/
+*pkl
