@@ -9,7 +9,7 @@ def functional_expansion(x_min, x_max, order):
     expand_filter = openmc.SpatialLegendreFilter(order, 'x', x_min, x_max)
     flux_tally.filters.append(expand_filter)
 
-    return openmc.Tallies([flux_tally])
+    return flux_tally
 
 
 def make_model():
@@ -40,7 +40,9 @@ def make_model():
     slab_model = openmc.Model()
     slab_model.geometry = openmc.Geometry(openmc.Universe(cells=cells))
     slab_model.materials = openmc.Materials(materials)
-    slab_model.tallies = functional_expansion(args.x_min, args.x_max, order=10)
+    a = 50
+    slab_model.tallies = openmc.Tallies([functional_expansion(args.x_min, args.x_max - a, order=10),
+                                         functional_expansion(args.x_max - a - 20, args.x_max, order=10)])
     slab_model.settings = simulation_settings(args, space_dist=openmc.stats.Box(lower_left=(args.x_min, args.y_min, args.z_min), upper_right=(args.x_max, args.y_max, args.z_max)))
 
     return slab_model
