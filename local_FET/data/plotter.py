@@ -3,7 +3,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 sp_file = "/home/ebny-walid-ahammed/Documents/github/nonte-fonte/local_FET/statepoint.200.h5"
-xmin, xmax = 0, 100
+xmin, xmax = -1, 1
 
 
 def plot_flux(data_frames, xmin, xmax):
