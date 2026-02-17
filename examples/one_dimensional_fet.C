@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
     const long int N = std::stoi(argv[1]);
     const int order = std::stoi(argv[2]);
     float average = 0.0f;
-    nontefonte::Function pdf("x*x-3*x",{"x"});
+    nontefonte::Function pdf("sin(10*x)",{"x"});
     nontefonte::LegendreBasis legendre_polynomials(order, nontefonte::Dimension::x);
 
     std::vector<double> co_efficients (order+1, 0.0);
