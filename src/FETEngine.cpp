@@ -68,7 +68,7 @@ nontefonte::FETEngine::basisProduct(const std::vector<LegendreBasis> &basis,
                                     const std::vector<int> &mi) const {
   double score = 1.0;
   for (size_t d = 0; d < basis.size(); ++d)
-    score *= basis[d](static_cast<double >(x[d]), mi[d]);
+    score *= basis[d](x[d], mi[d]);
   return score;
 }
 
@@ -86,7 +86,7 @@ std::vector<double> nontefonte::FETEngine::accumulateTrials(
     for (int flat = 0; flat < _number_of_co_efficients; ++flat) {
       auto mi = multiIndex(flat);
       double score = basisProduct(basis, x, mi);
-      sums[flat] += score * pdf_val / _number_of_trials;
+      sums[flat] += score * pdf_val ;
     }
   }
   return sums;
@@ -112,6 +112,6 @@ void nontefonte::FETEngine::runSimulation(Function &pdf) {
 
 #pragma omp critical
     for (int flat = 0; flat < _number_of_co_efficients; ++flat)
-      _co_efficients[flat] += thread_sums[flat];
+      _co_efficients[flat] += thread_sums[flat]/_number_of_trials;
   }
 }

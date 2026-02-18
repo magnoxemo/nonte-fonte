@@ -8,7 +8,7 @@ int main(int argc, char* argv[]) {
     const long N    = std::stol(argv[1]);
     const int  order = std::stoi(argv[2]);
 
-    nontefonte::Function pdf("sin(10*x)", {"x"});
+    nontefonte::Function pdf("sin(15*x)", {"x"});
 
     nontefonte::FETEngine engine({order}, N);
     engine.runSimulation(pdf);
