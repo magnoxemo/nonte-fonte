@@ -19,7 +19,7 @@ int main(int argc, char* argv[]){
     const int order = std::stoi(argv[2]);
     float average = 0.0f;
     nontefonte::Function pdf("sin(10*x)",{"x"});
-    nontefonte::LegendreBasis legendre_polynomials(order, nontefonte::Dimension::x);
+    nontefonte::LegendreBasis legendre_polynomials(order);
 
     std::vector<double> co_efficients (order+1, 0.0);
     #pragma omp parallel
@@ -38,7 +38,7 @@ int main(int argc, char* argv[]){
 
         #pragma omp parallel for reduction( vector_plus: co_efficients)
         for (long i = 0; i < N; i++) {
-            auto x = rng();
+            auto x =rng();
             auto pdf_value = local_pdf(x);
             for (int j =0 ; j< order; j++){
                 co_efficients[j] += pdf_value* local_legendre_polynomials(x, j);

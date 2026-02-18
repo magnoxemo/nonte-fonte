@@ -16,7 +16,7 @@ namespace nontefonte{
      * functions up to order n */
     class LegendreBasis{
     public:
-        LegendreBasis(const int n, Dimension dimension );
+        LegendreBasis(const int n);
 
 
         template <typename T>
@@ -43,7 +43,6 @@ namespace nontefonte{
         };
 
         const int _N;
-        Dimension _dim;
     };
 }
 

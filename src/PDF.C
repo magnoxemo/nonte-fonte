@@ -128,3 +128,7 @@ void nontefonte::Function::skipWhitespace() {
     while (_pos < _expression.size() && std::isspace(_expression[_pos]))
         ++_pos;
 }
+
+const int nontefonte::Function::getVariableSize()const {
+    return _variables.size();
+}

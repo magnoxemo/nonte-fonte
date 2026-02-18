@@ -34,6 +34,8 @@ namespace nontefonte {
             return result;
         }
 
+        const int getVariableSize()const;
+
     private:
         // Grammar:
         // expression = term { (+|-) term }
