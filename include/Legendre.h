@@ -20,7 +20,7 @@ namespace nontefonte{
 
 
         template <typename T>
-        double operator() (T x, const int order) {
+        double operator() (T x, const int order)const {
             if (order == 0) {
                 return 1.0;
             }
