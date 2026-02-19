@@ -203,9 +203,11 @@ protected:
    * Built once in @ref initCoefficients() so that @ref accumulateTrials
    * never allocates a temporary index vector inside the hot loop.
    */
-  std::vector<std::vector<int>> _multi_index_table;
 
 private:
+
+  std::vector<std::vector<int>> _multi_index_table;
+  std::vector<double>           _norm_factors;
   /**
    * @brief Allocates and zero-initialises @ref _co_efficients and
    *        populates @ref _multi_index_table.

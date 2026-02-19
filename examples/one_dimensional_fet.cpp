@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   const long number_of_trials = std::stol(argv[1]);
   const int order = std::stoi(argv[2]);
 
-  nontefonte::Function pdf("sin(3*x)", {"x"});
+  nontefonte::Function pdf("3*x*x-4*x+5", {"x"});
 
   nontefonte::FonteEngineOneDimension engine(order, number_of_trials);
   engine.runSimulation(pdf);
