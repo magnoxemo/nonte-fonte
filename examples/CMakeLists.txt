@@ -1,5 +1,5 @@
 add_executable(simple_pdf simple_pdf.cpp)
-add_executable(fet_one_dimension one_dimensional_fet.C)
+add_executable(fet_one_dimension one_dimensional_fet.cpp)
 
 target_link_libraries(simple_pdf
         PRIVATE
