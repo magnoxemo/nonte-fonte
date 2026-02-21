@@ -25,7 +25,7 @@ namespace nontefonte{
                 return 1.0;
             }
             if (order == 1) {
-                return statice_cast<double>(x);
+                return static_cast<double>(x);
             }
 
             double p_prev2 = 1.0;
