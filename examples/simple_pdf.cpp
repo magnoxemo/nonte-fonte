@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "FonteEngineThreeDimension.h"
+#include "FonteEngineOneDimension.h"
 #include "PDF.h"
 
 int main(int argc, char *argv[]) {
@@ -11,22 +11,19 @@ int main(int argc, char *argv[]) {
 
   const long int number_of_trials = std::stol(argv[1]);
 
-  nontefonte::Function pdf("sin(x)/cos(y)+(y-x/cos(x))^2 +z*z - sqrt(x*x)",
-                           {"x", "y", "z"});
+  nontefonte::Function pdf("sin(x)+cos(x)^2", {"x"});
 
-  nontefonte::FonteEngineThreeDimension engine({8, 8, 9}, number_of_trials);
+  nontefonte::FonteEngineOneDimension engine(8, number_of_trials);
   engine.runSimulation(pdf);
 
   const auto coefficients = engine.getCoefficients();
   const int order_x = engine._orders[0];
-  const int order_y = engine._orders[1];
 
+  std::cout << "[ ";
   for (int i = 0; i <= order_x; ++i) {
-    for (int j = 0; j <= order_y; ++j) {
-      std::cout << coefficients[i * (order_y + 1) + j] << " ";
-    }
-    std::cout << "\n";
+      std::cout << coefficients[i ] << " ,";
   }
+  std::cout << "]\n";
 
   return 0;
 }

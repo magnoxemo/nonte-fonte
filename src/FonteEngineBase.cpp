@@ -56,11 +56,8 @@ namespace nontefonte {
         for (size_t d = 0; d < mi.size(); ++d) {
           const double width = _domain[d].second - _domain[d].first;
           /* Just reexpression my thoughts:
-           * For montecarlo simulation we use this formula as the normalization coefficient
-           * (2 * n + 1) /2 which is formulated presuming rho(x) = 1
-           * But when we are sampling random PDF the weighting function is basically rho = 1 /(b -a)
-           * random number related probability so actual normalization coefficient will be
-           * (2 * n + 1) */
+           needs to work on this. while we evaluate the integral
+           */
           factor *= static_cast<double>(2 * mi[d] + 1) ;
         }
         _norm_factors[flat] = factor;
@@ -122,9 +119,6 @@ namespace nontefonte {
       return partial_sums;
     }
 
-// ---------------------------------------------------------------------------
-// runSimulation
-// ---------------------------------------------------------------------------
 
     void FonteEngineBase::runSimulation(Function &pdf) {
       const int dim = static_cast<int>(_orders.size());
@@ -140,31 +134,25 @@ namespace nontefonte {
         const long trials_this_thread =
                 base_trials + (thread_id == 0 ? remainder : 0L);
 
-        std::default_random_engine gen(
-                std::random_device{}() + static_cast<unsigned>(thread_id));
-
-        Function local_pdf = pdf;
+        std::default_random_engine gen( std::random_device{}() + static_cast<unsigned>(thread_id));
+        auto local_pdf = pdf;
 
         std::vector<LegendreBasis> basis;
         std::vector<std::uniform_real_distribution<double>> dists;
         basis.reserve(dim);
         dists.reserve(dim);
+
         for (int d = 0; d < dim; ++d) {
           basis.emplace_back(_orders[d]);
           dists.emplace_back(_domain[d].first, _domain[d].second);
         }
 
-        auto partial_sums =
-                accumulateTrials(local_pdf, basis, dists, gen, trials_this_thread);
+        auto partial_sums = accumulateTrials(local_pdf, basis, dists, gen, trials_this_thread);
 
-        // Divide by total N — normalization factor is already baked in.
-        const double inv_total = 1.0 / static_cast<double>(_number_of_trials);
-        for (double &s : partial_sums)
-          s *= inv_total;
 
 #pragma omp critical
         for (int flat = 0; flat < _number_of_co_efficients; ++flat)
-          _co_efficients[flat] += partial_sums[flat];
+          _co_efficients[flat] += partial_sums[flat]/ static_cast<double>(_number_of_trials);
       }
     }
 

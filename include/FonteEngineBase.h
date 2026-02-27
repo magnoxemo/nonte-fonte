@@ -13,7 +13,7 @@ namespace nontefonte {
 class Function;
 
 /**
- * @brief Base class for the Fonte Monte Carlo functional expansion engine.
+ * @brief Base class for the Fonte functional expansion engine.
  *
  * Provides a dimension-agnostic framework for estimating probability density
  * functions via Monte Carlo sampling and Legendre polynomial expansions.
