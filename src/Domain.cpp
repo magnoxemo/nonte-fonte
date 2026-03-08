@@ -1,7 +1,7 @@
 #include "Domain.h"
 #include <stdexcept>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     Domain::Domain(double x_min, double x_max)
             : _dim(1), _bounds{{x_min, x_max, 0, 0, 0, 0}}

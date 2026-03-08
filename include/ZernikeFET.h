@@ -10,7 +10,7 @@
 #include <vector>
 #include <utility>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     class ZernikeFET : public TallyBase {
     public:

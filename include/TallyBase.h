@@ -9,7 +9,7 @@
 #include "Domain.h"
 #include <vector>
 
-namespace local_fet {
+namespace nonte_fonte {
 
 /**
  * @class TallyBase

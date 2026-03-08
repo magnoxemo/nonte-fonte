@@ -20,9 +20,8 @@
 #include <fstream>
 #include <cmath>
 
-using namespace local_fet;
 
-// Piecewise PDF matching Python example
+// Grisheimer's pdf
 double piecewise_pdf(const std::vector<double>& x) {
     constexpr double norm = 1.0 / 1.51985;
     double val = x[0];
@@ -39,17 +38,16 @@ double piecewise_pdf(const std::vector<double>& x) {
 
 int main() {
 
-    Domain global_domain(-1.0, 1.0);
+    nonte_fonte::Domain global_domain(-1.0, 1.0);
 
-    std::vector<Domain> domains = {
-            Domain(-1.0, -0.5),
-            Domain(-0.5, 0.5),
-            Domain(0.5, 1.0)
+    std::vector<nonte_fonte::Domain> domains = {
+            nonte_fonte::Domain(-1.0, -0.5),
+            nonte_fonte::Domain(-0.5, 0.5),
+            nonte_fonte::Domain(0.5, 1.0)
     };
     std::vector<int> orders = {2, 4, 2};
 
-    // Create tallies
-    std::vector<LegendreFET> tallies;
+    std::vector<nonte_fonte::LegendreFET> tallies;
     for (size_t i = 0; i < domains.size(); ++i) {
         tallies.emplace_back(domains[i], std::vector<int>{orders[i]});
         std::cout << "Tally " << i+1 << ": ["
@@ -59,9 +57,8 @@ int main() {
 
     std::cout << "\n";
 
-    // Monte Carlo simulation
-    long n_samples = 300000;
-    MCSimulation mc(global_domain, piecewise_pdf, n_samples);
+    long n_samples = 30000000;
+    nonte_fonte::MCSimulation mc(global_domain, piecewise_pdf, n_samples);
 
     for (auto& tally : tallies) {
         mc.addTally(&tally);

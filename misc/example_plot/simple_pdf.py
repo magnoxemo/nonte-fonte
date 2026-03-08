@@ -1,6 +1,6 @@
 import sys
 sys.path.append("../")
-from misc.plotter_utilities import *
+from misc.plotting_utilities import *
 
 
 

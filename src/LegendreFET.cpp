@@ -1,7 +1,7 @@
 #include "LegendreFET.h"
 #include <cmath>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     LegendreFET::LegendreFET(const Domain& domain, const std::vector<int>& orders)
             : FETBase(domain, orders) {}

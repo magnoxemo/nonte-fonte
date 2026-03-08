@@ -1,13 +1,15 @@
 #include "MonteCarloSimulation.h"
+#include "TallyBase.h"
+#include "Domain.h"
 
 #include <random>
 #include <iostream>
 #include <stdexcept>
 #include <omp.h>
 
-namespace local_fet {
+namespace nonte_fonte {
 
-    MCSimulation::MCSimulation(const Domain& global_domain,
+    MCSimulation::MCSimulation(const nonte_fonte::Domain& global_domain,
                                std::function<double(const std::vector<double>&)> target_pdf,
                                long n_samples,
                                unsigned seed)
@@ -21,7 +23,7 @@ namespace local_fet {
       }
     }
 
-    void MCSimulation::addTally(TallyBase* tally)
+    void MCSimulation::addTally(nonte_fonte::TallyBase* tally)
     {
       if (tally == nullptr) {
         throw std::invalid_argument("Cannot add null tally");
@@ -40,7 +42,7 @@ namespace local_fet {
       const int dim = _domain.dim();
       const double measure = _domain.measure();
 
-      printLogo();
+      nonte_fonte::printLogo();
       std::cout<<"\n\n";
       std::cout << "========================================\n";
       std::cout << "Monte Carlo Simulation\n";
@@ -57,7 +59,7 @@ namespace local_fet {
 
       std::vector<double> thread_weights(num_threads, 0.0);
 
-#pragma omp parallel
+      #pragma omp parallel
       {
         int thread_id = omp_get_thread_num();
 
@@ -67,14 +69,8 @@ namespace local_fet {
 
         long samples_per_thread = _n_samples / num_threads;
         long start = thread_id * samples_per_thread;
-        long end = (thread_id == num_threads - 1)
-                   ? _n_samples
-                   : start + samples_per_thread;
+        long end = (thread_id == num_threads - 1) ? _n_samples : start + samples_per_thread;
 
-#pragma omp single
-        {
-          std::cout << "Sampling...\n";
-        }
 
         for (long i = start; i < end; ++i) {
 
@@ -88,24 +84,13 @@ namespace local_fet {
 
           for (auto* tally : _tallies) {
             if (tally->contains(point)) {
-#pragma omp critical
+              #pragma omp critical
               {
                 tally->score(point, weight);
               }
             }
           }
 
-          if (thread_id == 0 &&
-              (i - start + 1) % (samples_per_thread / 10) == 0) {
-
-            int percent = static_cast<int>(
-                    100.0 * (i + 1) / _n_samples);
-
-#pragma omp critical
-            {
-              std::cout << "  Progress: " << percent << "%\n";
-            }
-          }
         }
 
         thread_weights[thread_id] = local_weight;

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     ZernikeFET::ZernikeFET(const Domain& domain, double radius, int max_n)
             : TallyBase(domain), _radius(radius), _max_n(max_n)

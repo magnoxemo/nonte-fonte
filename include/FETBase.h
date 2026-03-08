@@ -9,7 +9,7 @@
 #include "TallyBase.h"
 #include <vector>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     class FETBase : public TallyBase {
     public:

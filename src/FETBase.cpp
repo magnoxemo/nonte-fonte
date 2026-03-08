@@ -1,7 +1,7 @@
 #include "FETBase.h"
 #include <stdexcept>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     FETBase::FETBase(const Domain& domain, const std::vector<int>& orders)
             : TallyBase(domain), _orders(orders)

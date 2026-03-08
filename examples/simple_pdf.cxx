@@ -18,7 +18,6 @@
 #include <fstream>
 #include <cmath>
 
-using namespace local_fet;
 
 // Simple PDF: f(x) = 6x(1-x) on [0,1]
 double beta_pdf(const std::vector<double>& x) {
@@ -28,12 +27,8 @@ double beta_pdf(const std::vector<double>& x) {
 }
 
 int main() {
-  std::cout << "========================================\n";
-  std::cout << "Histogram + FET Example\n";
-  std::cout << "========================================\n\n";
 
-  // Global domain
-  Domain global_domain(0.0, 1.0);
+  nonte_fonte::Domain global_domain(0.0, 1.0);
 
   // Create histogram with uniform mesh
   int num_bins = 10;
@@ -41,15 +36,15 @@ int main() {
   for (int i = 0; i <= num_bins; ++i) {
     mesh.push_back(i / static_cast<double>(num_bins));
   }
-  HistogramTally1D histogram(global_domain, mesh);
+  nonte_fonte::HistogramTally1D histogram(global_domain, mesh);
 
   // Create FET tallies on overlapping domains
-  LegendreFET tally1(Domain(0.0, 0.8), {3});
-  LegendreFET tally2(Domain(0.2, 1.0), {3});
+  nonte_fonte::LegendreFET tally1(nonte_fonte::Domain(0.0, 0.8), {3});
+  nonte_fonte::LegendreFET tally2(nonte_fonte::Domain(0.2, 1.0), {3});
 
   // Monte Carlo
   long n_samples = 100000;
-  MCSimulation mc(global_domain, beta_pdf, n_samples);
+  nonte_fonte::MCSimulation mc(global_domain, beta_pdf, n_samples);
 
   mc.addTally(&histogram);
   mc.addTally(&tally1);

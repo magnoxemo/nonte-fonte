@@ -13,29 +13,35 @@
 #include <functional>
 #include <iostream>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     void printLogo()
     {
-        std::cout <<
-                          R"( _   _       _        _____            _
+        std::cout <<R"(
+        ._  __      ._.      .-----.          .-.
         | \ | | ___ | |_ ___ |  ___|__  _ __  | |_ ___
         |  \| |/ _ \| __/ _ \| |_ / _ \| '_ \ | __/ _ \
         | |\  | (_) | ||  __/|  _| (_) | | | || ||  __/
         |_| \_|\___/ \__\___||_|  \___/|_| |_| \__\___|
 
                      n o t e - f o n t e
+        A FET testing mini app.
+
+        Ebny Walid Ahammed
+        Computational Nuclear Engineering Research Lab
+        Dept of Nuclear Engineering and Engineering Physics
+        University of Wisconsin-Madison.
         )" << std::endl;
     }
 
     class MCSimulation {
     public:
-        MCSimulation(const Domain& global_domain,
+        MCSimulation(const nonte_fonte::Domain& global_domain,
                      std::function<double(const std::vector<double>&)> target_pdf,
                      long n_samples,
                      unsigned seed = 0);
 
-        void addTally(TallyBase* tally);
+        void addTally(nonte_fonte::TallyBase* tally);
 
         void run();
 
@@ -44,7 +50,7 @@ namespace local_fet {
         int dim() const { return _domain.dim(); }
 
     private:
-        Domain _domain;
+        nonte_fonte::Domain _domain;
         std::function<double(const std::vector<double>&)> _pdf;
         long _n_samples;
         unsigned _master_seed;

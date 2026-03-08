@@ -4,7 +4,8 @@ __pycache__/
 *.xml
 *.h5
 *.out
-
+*png
+*.csv
 
 *.ipynb
 .ipynb_checkpoints/

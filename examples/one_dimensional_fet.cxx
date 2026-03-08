@@ -18,7 +18,6 @@
 #include <fstream>
 #include <cmath>
 
-using namespace local_fet;
 
 // 2D Gaussian
 double gaussian_2d(const std::vector<double>& x) {
@@ -32,10 +31,10 @@ int main() {
   std::cout << "========================================\n\n";
 
   // Domain
-  Domain domain(-2.0, 2.0, -2.0, 2.0);
+  nonte_fonte::Domain domain(-2.0, 2.0, -2.0, 2.0);
 
   // 2D Legendre FET
-  LegendreFET legendre(domain, {8, 8});  // orders (8, 8)
+  nonte_fonte::LegendreFET legendre(domain, {8, 8});  // orders (8, 8)
 
   // 2D structured histogram
   std::vector<double> x_edges, y_edges;
@@ -44,11 +43,11 @@ int main() {
     x_edges.push_back(val);
     y_edges.push_back(val);
   }
-  HistogramTally2D histogram(domain, x_edges, y_edges);
+  nonte_fonte::HistogramTally2D histogram(domain, x_edges, y_edges);
 
   // Monte Carlo
   long n_samples = 500000;
-  MCSimulation mc(domain, gaussian_2d, n_samples);
+  nonte_fonte::MCSimulation mc(domain, gaussian_2d, n_samples);
 
   mc.addTally(&legendre);
   mc.addTally(&histogram);

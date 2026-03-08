@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include <limits>
 
-namespace local_fet {
+namespace nonte_fonte {
 
 
     HistogramTally1D::HistogramTally1D(

@@ -11,7 +11,7 @@
 #include <array>
 #include <utility>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     class HistogramTally1D : public TallyBase {
     public:

@@ -2,7 +2,7 @@
 #include <cmath>
 #include <stdexcept>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     FourierFET::FourierFET(const Domain& domain, const std::vector<int>& modes)
             : FETBase(domain, modes)

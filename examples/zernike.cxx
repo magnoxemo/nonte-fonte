@@ -13,8 +13,6 @@
 #include <fstream>
 #include <cmath>
 
-using namespace local_fet;
-
 // Gaussian on circular disk
 double gaussian_circular(const std::vector<double>& x) {
     double r_sq = x[0]*x[0] + x[1]*x[1];
@@ -22,7 +20,7 @@ double gaussian_circular(const std::vector<double>& x) {
 
     if (std::sqrt(r_sq) > radius) return 0.0;
 
-    return std::exp(-r_sq) / (M_PI * radius * radius);
+    return 2+std::exp(-r_sq) / (M_PI * radius * radius);
 }
 
 int main() {
@@ -32,16 +30,16 @@ int main() {
 
     // Domain containing circle
     double radius = 1.5;
-    Domain domain(-radius, radius, -radius, radius);
+    nonte_fonte::Domain domain(-radius, radius, -radius, radius);
 
     // Zernike tally
-    ZernikeFET tally(domain, radius, 8);  // max order = 8
+    nonte_fonte::ZernikeFET tally(domain, radius, 8);  // max order = 8
 
     std::cout << "Number of Zernike modes: " << tally.modes().size() << "\n\n";
 
     // Monte Carlo
-    long n_samples = 500000;
-    MCSimulation mc(domain, gaussian_circular, n_samples);
+    long n_samples = 5000000;
+    nonte_fonte::MCSimulation mc(domain, gaussian_circular, n_samples);
     mc.addTally(&tally);
     mc.run();
 

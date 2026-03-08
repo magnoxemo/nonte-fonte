@@ -11,7 +11,7 @@
 #include <utility>
 #include <random>
 
-namespace local_fet {
+namespace nonte_fonte {
 
     class Domain {
     public:
