@@ -28,7 +28,7 @@ namespace nonte_fonte {
         A FET testing mini app.
 
         Ebny Walid Ahammed
-        Computational Nuclear Engineering Research Lab
+        Computational Nuclear Engineering Research Group
         Dept of Nuclear Engineering and Engineering Physics
         University of Wisconsin-Madison.
         )" << std::endl;
