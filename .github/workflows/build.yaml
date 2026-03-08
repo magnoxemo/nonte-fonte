@@ -37,5 +37,6 @@ jobs:
 
       - name: Run example
         run: |
-          cd build/examples
-          ./simple_pdf
+          cd build/unit_test
+          ./test_domain
+          ./test_legendre

@@ -4,7 +4,9 @@
 namespace nonte_fonte {
 
     LegendreFET::LegendreFET(const Domain& domain, const std::vector<int>& orders)
-            : FETBase(domain, orders) {}
+            : FETBase(domain, orders) {
+        computeNormalizationFactors();
+    }
 
     void LegendreFET::score(const std::vector<double>& point, double weight)
     {
@@ -31,7 +33,6 @@ namespace nonte_fonte {
 
             _coefficients[idx] += weight * basis_val;
         }
-        computeNormalizationFactors();
     }
 
     double LegendreFET::reconstruct(const std::vector<double>& point) const
