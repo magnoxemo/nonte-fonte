@@ -1,14 +1,11 @@
-add_executable(simple_pdf simple_pdf.cpp)
-add_executable(fet_one_dimension one_dimensional_fet.cpp)
+file(GLOB EXAMPLES *.cxx *.cpp)
 
-target_link_libraries(simple_pdf
-        PRIVATE
-        note_fonte_lib
-)
-
-
-target_link_libraries(fet_one_dimension
-        PRIVATE
-        note_fonte_lib
-)
-
+# adding test executables for every case
+foreach(EXAMPLE ${EXAMPLES})
+    get_filename_component(EX_NAME ${EXAMPLE} NAME_WE)
+    add_executable(${EX_NAME} ${EXAMPLE})
+    target_link_libraries(${EX_NAME}
+            PRIVATE
+            note_fonte_lib
+    )
+endforeach()

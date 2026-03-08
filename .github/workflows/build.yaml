@@ -12,23 +12,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
       - name: Install dependencies
         run: |
-          sudo apt-get update && sudo apt-get install -y libopenmpi-dev openmpi-bin         
-          sudo apt install -y cmake libgtest-dev
-      - name: Checkout code
-        uses: actions/checkout@v4
+          sudo apt-get update
+          sudo apt-get install -y libopenmpi-dev openmpi-bin cmake libgtest-dev
+
+      - name: Cache build directory
+        uses: actions/cache@v3
+        with:
+          path: build
+          key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-build-
 
       - name: Build
-        shell: bash
         run: |
-          mkdir build
+          mkdir -p build
           cd build
           cmake ..
           make -j 8
 
       - name: Run example
-        shell: bash
         run: |
           cd build/examples
-          ./simple_pdf 100
+          ./simple_pdf
