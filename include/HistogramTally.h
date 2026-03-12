@@ -1,8 +1,3 @@
-/**
- * @file HistogramTally.h
- * @brief Histogram tallies for 1D and 2D structured/unstructured meshes
- */
-
 #ifndef LOCAL_FET_HISTOGRAM_TALLY_H
 #define LOCAL_FET_HISTOGRAM_TALLY_H
 

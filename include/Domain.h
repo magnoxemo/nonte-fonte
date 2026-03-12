@@ -1,8 +1,3 @@
-/**
- * @file Domain.h
- * @brief Unified domain representation for 1D, 2D, and 3D
- */
-
 #ifndef LOCAL_FET_DOMAIN_H
 #define LOCAL_FET_DOMAIN_H
 

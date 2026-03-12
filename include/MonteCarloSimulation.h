@@ -1,8 +1,3 @@
-/**
- * @file MCSimulation.h
- * @brief Unified Monte Carlo simulation for N-dimensional PDFs
- */
-
 #ifndef LOCAL_FET_MC_SIMULATION_H
 #define LOCAL_FET_MC_SIMULATION_H
 

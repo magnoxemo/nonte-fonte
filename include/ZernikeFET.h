@@ -1,8 +1,3 @@
-/**
- * @file ZernikeFET.h
- * @brief Zernike polynomial FET for circular domains
- */
-
 #ifndef LOCAL_FET_ZERNIKE_FET_H
 #define LOCAL_FET_ZERNIKE_FET_H
 

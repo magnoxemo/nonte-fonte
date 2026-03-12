@@ -1,8 +1,3 @@
-/**
- * @file FETBase.h
- * @brief Base class for Functional Expansion Tallies
- */
-
 #ifndef LOCAL_FET_FET_BASE_H
 #define LOCAL_FET_FET_BASE_H
 

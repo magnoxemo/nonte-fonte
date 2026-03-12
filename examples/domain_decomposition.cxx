@@ -1,20 +1,11 @@
-/**
- * @file domain_decomposition_example.cpp
- * @brief Domain decomposition example matching Python version
- *
- * Demonstrates multiple FET tallies on different sub-domains.
- */
-
 #include "Domain.h"
 #include "TallyBase.h"
 #include "MonteCarloSimulation.h"
-
-// FET tallies
 #include "FETBase.h"
 #include "LegendreFET.h"
-
-// Histogram tallies
 #include "HistogramTally.h"
+
+
 #include <iostream>
 #include <iomanip>
 #include <fstream>
@@ -68,7 +59,6 @@ int main() {
 
     std::cout << "\n";
 
-    // Display coefficients
     std::cout << "Legendre Coefficients:\n";
     for (size_t i = 0; i < tallies.size(); ++i) {
         std::cout << "  Tally " << i+1 << ": [";
@@ -80,9 +70,7 @@ int main() {
         std::cout << "]\n";
     }
 
-    std::cout << "\n";
 
-    // Compute errors
     std::cout << "L2 Errors:\n";
     for (size_t i = 0; i < tallies.size(); ++i) {
         double error_sum = 0.0;
@@ -104,7 +92,7 @@ int main() {
 
     std::cout << "\n";
 
-    // Export results
+    // write in CSV
     std::ofstream file("domain_decomposition_results.csv");
     file << "x,true_pdf";
     for (size_t i = 0; i < tallies.size(); ++i) {
@@ -126,8 +114,6 @@ int main() {
     }
     file.close();
 
-    std::cout << "Results exported to domain_decomposition_results.csv\n";
-    std::cout << "========================================\n";
 
     return 0;
 }

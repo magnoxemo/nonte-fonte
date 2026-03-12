@@ -1,8 +1,3 @@
-/**
- * @file LegendreFET.h
- * @brief Legendre polynomial FET for 1D, 2D, and 3D
- */
-
 #ifndef LOCAL_FET_LEGENDRE_FET_H
 #define LOCAL_FET_LEGENDRE_FET_H
 
