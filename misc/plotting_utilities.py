@@ -1,7 +1,7 @@
 """
 plotting_utilities.py
-
-Generalized plotting utilities for Local FET C++ library results.
+This script is generate by Chatgpt
+Generalized plotting utilities for nonte-fonte (local_fet) C++ library results.
 """
 
 import numpy as np
