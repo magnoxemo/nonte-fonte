@@ -10,7 +10,23 @@
 #include <iostream>
 #include <memory>
 
+#include "Domain.h"
+
 namespace nonte_fonte {
+
+    std::vector<nonte_fonte::Domain> lin_space_domain(double start, double end, unsigned int N){
+
+        std::vector<nonte_fonte::Domain> dom;
+        auto dx = (end - start)/N;
+        double left =start;
+        for (int i = 0 ; i<=N; i ++){
+            nonte_fonte::Domain domain (left, left+dx);
+            dom.push_back(domain);
+            left = left+dx;
+        }
+        dom.shrink_to_fit();
+        return dom;
+    }
 
     struct Statistics {
         double mean = 0.0;

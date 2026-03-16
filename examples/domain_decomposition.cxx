@@ -4,6 +4,7 @@
 #include "FETBase.h"
 #include "LegendreFET.h"
 #include "HistogramTally.h"
+#include "Utilities.h"
 
 
 #include <iostream>
@@ -30,13 +31,8 @@ double piecewise_pdf(const std::vector<double>& x) {
 int main() {
 
     nonte_fonte::Domain global_domain(-1.0, 1.0);
-
-    std::vector<nonte_fonte::Domain> domains = {
-            nonte_fonte::Domain(-1.0, -0.5),
-            nonte_fonte::Domain(-0.5, 0.5),
-            nonte_fonte::Domain(0.5, 1.0)
-    };
-    std::vector<int> orders = {2, 4, 2};
+    auto domains = nonte_fonte::lin_space_domain(-1, 1, 10);
+    std::vector<int> orders = {2,2,10,2,2,2,2,2,2,2};
 
     std::vector<nonte_fonte::LegendreFET> tallies;
     for (size_t i = 0; i < domains.size(); ++i) {
@@ -59,38 +55,6 @@ int main() {
 
     std::cout << "\n";
 
-    std::cout << "Legendre Coefficients:\n";
-    for (size_t i = 0; i < tallies.size(); ++i) {
-        std::cout << "  Tally " << i+1 << ": [";
-        const auto& coeffs = tallies[i].coefficients();
-        for (size_t j = 0; j < coeffs.size(); ++j) {
-            std::cout << std::setprecision(6) << std::setw(10) << coeffs[j];
-            if (j < coeffs.size() - 1) std::cout << ", ";
-        }
-        std::cout << "]\n";
-    }
-
-
-    std::cout << "L2 Errors:\n";
-    for (size_t i = 0; i < tallies.size(); ++i) {
-        double error_sum = 0.0;
-        auto [min, max] = domains[i].bounds(0);
-        int n_test = 1000;
-        double dx = (max - min) / n_test;
-
-        for (int j = 0; j < n_test; ++j) {
-            double x_val = min + j * dx;
-            std::vector<double> point = {x_val};
-            double true_val = piecewise_pdf(point);
-            double recon_val = tallies[i].reconstruct(point);
-            double diff = true_val - recon_val;
-            error_sum += diff * diff * dx;
-        }
-
-        std::cout << "  Tally " << i+1 << ": " << std::sqrt(error_sum) << "\n";
-    }
-
-    std::cout << "\n";
 
     // write in CSV
     std::ofstream file("domain_decomposition_results.csv");

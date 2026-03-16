@@ -8,22 +8,18 @@
 #include <fstream>
 #include <cmath>
 
-
 double gaussian_circular(const std::vector<double>& x) {
     double r_sq = x[0]*x[0] + x[1]*x[1];
-    double radius = 1.5;
-
-    if (std::sqrt(r_sq) > radius) return 0.0;
-
-    return 2+std::exp(-r_sq) / (M_PI * radius * radius);
+    return std::exp(-r_sq) / M_PI;
 }
+
 
 void write_output(std::ofstream& file,double radius, const nonte_fonte::ZernikeFET& basis){
 
     file << "x,y,true_pdf,legendre_pdf\n";
 
-    for (double x = -radius; x <= radius; x += 0.1) {
-        for (double y = -radius; y <= radius; y += 0.1) {
+    for (double x = -radius; x <= radius; x += 0.01) {
+        for (double y = -radius; y <= radius; y += 0.01) {
             std::vector<double> point = {x, y};
             double r = std::sqrt(x*x + y*y);
             if (r <= radius) {
@@ -38,10 +34,10 @@ void write_output(std::ofstream& file,double radius, const nonte_fonte::ZernikeF
 
 int main() {
 
-    double radius = 1.5;
+    double radius = 1;
     long n_samples = 5000000;
     nonte_fonte::Domain domain(-radius, radius, -radius, radius);
-    nonte_fonte::ZernikeFET basis(domain, radius, 8);
+    nonte_fonte::ZernikeFET basis(domain, radius, 10);
 
     std::cout << "Number of Zernike modes: " << basis.modes().size() << "\n\n";
 

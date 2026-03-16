@@ -12,20 +12,21 @@
 #include <cmath>
 
 
-double gaussian_2d(const std::vector<double>& x) {
-  double r_sq = x[0]*x[0] + x[1]*x[1];
-  return std::exp(-r_sq) / M_PI;
+double gaussian_2d(const std::vector<double>& p) {
+
+    auto x = p[0];
+    auto y = p[1];
+    return std::abs(2*x*x*x - y*y + x*x*y -4*x*y*y +5*x*y -3*x +5*y);
 }
 
 void write_output(std::ofstream& file, const nonte_fonte::LegendreFET& basis){
 
   file << "x,y,true_pdf,legendre_pdf\n";
 
-  for (double x = -2.0; x <= 2.0; x += 0.1) {
-    for (double y = -2.0; y <= 2.0; y += 0.1) {
+  for (double x = -1.0; x <= 1.0; x += 0.1) {
+    for (double y = -1.0; y <= 0; y += 0.1) {
       std::vector<double> point = {x, y};
-      file << x << "," << y << "," << gaussian_2d(point) << ","
-           << basis.reconstruct(point) << "\n";
+      file << x << "," << y << "," << gaussian_2d(point) << "," << basis.reconstruct(point) << "\n";
     }
   }
   file.close();
@@ -33,8 +34,14 @@ void write_output(std::ofstream& file, const nonte_fonte::LegendreFET& basis){
 
 int main() {
 
-  nonte_fonte::Domain domain(-2.0, 2.0, -2.0, 2.0);
-  nonte_fonte::LegendreFET legendre(domain, {8, 8});  // orders (8, 8)
+
+  nonte_fonte::Domain whole_domain(-2.0, 2.0, -1.0, 1.0);
+
+  nonte_fonte::Domain domain_1(-2.0, 2.0, -1.0, 0);
+  nonte_fonte::Domain domain_2(-2.0, 2.0, 0, 1.0);
+  nonte_fonte::LegendreFET legendre_1(domain_1, {5,5});
+  nonte_fonte::LegendreFET legendre_2(domain_2, {5,5});
+
   constexpr int n_samples = 500000;
 
   std::vector<double> x_edges, y_edges;
@@ -43,25 +50,16 @@ int main() {
     x_edges.push_back(val);
     y_edges.push_back(val);
   }
-  nonte_fonte::HistogramTally2D histogram(domain, x_edges, y_edges);
-  nonte_fonte::MCSimulation mc(domain, gaussian_2d, n_samples);
+  nonte_fonte::MCSimulation mc(whole_domain, gaussian_2d, n_samples);
 
-  mc.addTally(&legendre);
-  mc.addTally(&histogram);
+  mc.addTally(&legendre_1);
+  mc.addTally(&legendre_2);
 
   mc.run();
 
-  std::cout << "\n";
-
-  std::cout << "PDF Comparison at Test Points:\n";
-  std::cout << std::setw(10) << "x" << std::setw(10) << "y"
-            << std::setw(15) << "True" << std::setw(15) << "Legendre"
-            << std::setw(15) << "Error\n";
-  std::cout << std::string(65, '-') << "\n";
-
 
   std::ofstream csv_file("example_2d_results.csv");
-  write_output(csv_file, legendre);
+  write_output(csv_file, legendre_1);
 
 
   return 0;

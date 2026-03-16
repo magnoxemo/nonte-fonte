@@ -1,6 +1,7 @@
 #include "ZernikeFET.h"
 #include <cmath>
 #include <stdexcept>
+#include <omp.h>
 
 namespace nonte_fonte {
 
@@ -25,10 +26,7 @@ namespace nonte_fonte {
         computeNormalization();
     }
 
-    void ZernikeFET::score(
-            const std::vector<double>& point,
-            double weight)
-    {
+    void ZernikeFET::score( const std::vector<double>& point, double weight) {
         double x = point[0];
         double y = point[1];
 
@@ -40,18 +38,11 @@ namespace nonte_fonte {
         double theta = std::atan2(y, x);
         double rho = r / _radius;
 
+
         for (size_t i = 0; i < _modes.size(); ++i) {
-
             auto mode = _modes[i];
-
-            double Z = evaluateZernike(
-                    rho,
-                    theta,
-                    mode.first,
-                    mode.second
-            );
-
-            _coefficients[i] += weight * Z;
+            double Z = evaluateZernike(rho, theta, mode.first, mode.second);
+            _coefficients[i]+= weight * Z;
         }
     }
 
@@ -66,9 +57,8 @@ namespace nonte_fonte {
         }
     }
 
-    double ZernikeFET::reconstruct(
-            const std::vector<double>& point) const
-    {
+    double ZernikeFET::reconstruct( const std::vector<double>& point) const{
+
         double x = point[0];
         double y = point[1];
 
@@ -79,32 +69,19 @@ namespace nonte_fonte {
 
         double theta = std::atan2(y, x);
         double rho = r / _radius;
-
         double result = 0.0;
 
+        #pragma omp parallel for reduction(+:result)
         for (size_t i = 0; i < _modes.size(); ++i) {
 
             auto mode = _modes[i];
-
-            double Z = evaluateZernike(
-                    rho,
-                    theta,
-                    mode.first,
-                    mode.second
-            );
-
-            result += _coefficients[i] * Z;
+            result += _coefficients[i] * evaluateZernike(rho, theta, mode.first, mode.second);;
         }
 
         return result;
     }
 
-    double ZernikeFET::evaluateZernike(
-            double rho,
-            double theta,
-            int n,
-            int m) const
-    {
+    double ZernikeFET::evaluateZernike(double rho, double theta, int n, int m) const {
         double R = evaluateRadial(rho, n, std::abs(m));
 
         if (m >= 0)
@@ -113,11 +90,7 @@ namespace nonte_fonte {
             return R * std::sin(std::abs(m) * theta);
     }
 
-    double ZernikeFET::evaluateRadial(
-            double rho,
-            int n,
-            int m) const
-    {
+    double ZernikeFET::evaluateRadial(double rho, int n, int m) const{
         if ((n - m) % 2 != 0)
             return 0.0;
 
@@ -128,33 +101,23 @@ namespace nonte_fonte {
         for (int k = 0; k <= k_max; ++k) {
 
             double sign = (k % 2 == 0) ? 1.0 : -1.0;
-
-            double coeff =
-                    sign * factorial(n - k) /
-                    ( factorial(k)
-                      * factorial((n + m)/2 - k)
-                      * factorial((n - m)/2 - k) );
-
-            result += coeff * std::pow(rho, n - 2*k);
+            double co_eff = sign * factorial(n - k) / ( factorial(k) * factorial((n + m)/2 - k) * factorial((n - m)/2 - k) );
+            result += co_eff * std::pow(rho, n - 2*k);
         }
 
         return result;
     }
 
-    double ZernikeFET::factorial(int n) const
-    {
+    double ZernikeFET::factorial(int n) const {
         static std::vector<double> cache = {1.0};
 
         while (static_cast<int>(cache.size()) <= n)
             cache.push_back(cache.back() * cache.size());
 
-        return (n >= 0 && n < static_cast<int>(cache.size()))
-               ? cache[n]
-               : 1.0;
+        return (n >= 0 && n < static_cast<int>(cache.size())) ? cache[n] : 1.0;
     }
 
-    void ZernikeFET::computeNormalization()
-    {
+    void ZernikeFET::computeNormalization() {
         _norm_factors.resize(_modes.size());
 
         double area = M_PI * _radius * _radius;

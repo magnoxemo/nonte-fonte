@@ -44,17 +44,17 @@ namespace nonte_fonte {
 
       nonte_fonte::printLogo();
       std::cout<<"\n\n";
-      std::cout << "========================================\n";
-      std::cout << "Monte Carlo Simulation\n";
-      std::cout << "========================================\n";
-      std::cout << "Dimensionality: " << dim << "D\n";
-      std::cout << "Domain measure: " << measure << "\n";
-      std::cout << "Total samples: " << _n_samples << "\n";
-      std::cout << "Tallies: " << _tallies.size() << "\n";
+      std::cout << "=================================================\n";
+      std::cout << "             Monte Carlo Simulation\n";
+      std::cout << "=================================================\n";
+      std::cout << "     Dimensionality: " << dim << "D\n";
+      std::cout << "     Domain measure: " << measure << "\n";
+      std::cout << "     Total samples: " << _n_samples << "\n";
+      std::cout << "     Tallies: " << _tallies.size() << "\n";
 
       int num_threads = omp_get_max_threads();
 
-      std::cout << "OpenMP threads: " << num_threads << "\n";
+      std::cout << "    OpenMP threads: " << num_threads << "\n";
       std::cout << "========================================\n\n";
 
       std::vector<double> thread_weights(num_threads, 0.0);
@@ -71,14 +71,10 @@ namespace nonte_fonte {
         long start = thread_id * samples_per_thread;
         long end = (thread_id == num_threads - 1) ? _n_samples : start + samples_per_thread;
 
-
         for (long i = start; i < end; ++i) {
 
           std::vector<double> point = _domain.sample(rng);
-
-          double pdf_value = _pdf(point);
-
-          double weight = pdf_value * measure;
+          double weight = _pdf(point) * measure;
 
           local_weight += weight;
 
