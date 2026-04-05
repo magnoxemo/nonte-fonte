@@ -1,6 +1,6 @@
 #include "LegendreFET.h"
 #include <cmath>
-
+#include "iostream"
 namespace nonte_fonte {
 
     LegendreFET::LegendreFET(const Domain& domain, const std::vector<int>& orders)

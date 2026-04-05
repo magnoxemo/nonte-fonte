@@ -44,6 +44,9 @@ namespace nonte_fonte {
 
         int dim() const { return _domain.dim(); }
 
+        std::vector<TallyBase*> getTallies(){
+            return _tallies;
+        }
     private:
         nonte_fonte::Domain _domain;
         std::function<double(const std::vector<double>&)> _pdf;
