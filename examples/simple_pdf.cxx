@@ -4,6 +4,7 @@
 #include "FETBase.h"
 #include "LegendreFET.h"
 #include "HistogramTally.h"
+#include "Utilities.h"
 
 
 #include <iostream>
@@ -40,6 +41,8 @@ int main() {
 
   mc.run();
 
-
+  std::ofstream output_file("output.txt");
+  nonte_fonte::WriteLegendreOutput(output_file, tally1);
+  nonte_fonte::WriteLegendreOutput(output_file, tally2);
   return 0;
 }

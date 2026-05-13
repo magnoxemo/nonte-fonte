@@ -4,6 +4,7 @@
 #include "FETBase.h"
 #include "LegendreFET.h"
 #include "HistogramTally.h"
+#include "Utilities.h"
 
 
 #include <iostream>
@@ -19,18 +20,6 @@ double gaussian_2d(const std::vector<double>& p) {
     return std::abs(2*x*x*x - y*y + x*x*y -4*x*y*y +5*x*y -3*x +5*y);
 }
 
-void write_output(std::ofstream& file, const nonte_fonte::LegendreFET& basis){
-
-  file << "x,y,true_pdf,legendre_pdf\n";
-
-  for (double x = -1.0; x <= 1.0; x += 0.1) {
-    for (double y = -1.0; y <= 0; y += 0.1) {
-      std::vector<double> point = {x, y};
-      file << x << "," << y << "," << gaussian_2d(point) << "," << basis.reconstruct(point) << "\n";
-    }
-  }
-  file.close();
-}
 
 int main() {
 
@@ -59,7 +48,9 @@ int main() {
 
 
   std::ofstream csv_file("example_2d_results.csv");
-  write_output(csv_file, legendre_1);
+  nonte_fonte::WriteLegendreOutput(csv_file, legendre_1);
+  nonte_fonte::WriteLegendreOutput(csv_file, legendre_2);
+
 
 
   return 0;

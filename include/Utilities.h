@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "Domain.h"
+#include "LegendreFET.h"
 
 namespace nonte_fonte {
 
@@ -140,6 +141,48 @@ namespace nonte_fonte {
                 std::cout << std::setw(12) << "N/A";
             }
             std::cout << "\n";
+        }
+    }
+
+    void WriteLegendreOutput(std::ostream& out, const LegendreFET& fet)
+    {
+        const auto& orders = fet.orders();
+        const auto& coeffs = fet.coefficients();
+
+        out << "Domain = ";
+        for (std::size_t d = 0; d < orders.size(); ++d){
+            auto [min, max] = fet.domain().bounds(d);
+            out << min << ", " << max << (d + 1 < orders.size() ? ", " : "\n");
+        }
+
+        auto fmt = [&](auto v){
+            out << std::setw(10) << std::setprecision(6) << v << ", ";
+        };
+
+        std::size_t idx = 0;
+
+        if (orders.size() == 1){
+            for (int i = 0; i <= orders[0]; ++i)
+                fmt(coeffs[idx++]);
+            out << "\n";
+        }
+        else if (orders.size() == 2){
+            for (int i = 0; i <= orders[0]; ++i){
+                for (int j = 0; j <= orders[1]; ++j)
+                    fmt(coeffs[idx++]);
+                out << "\n";
+            }
+        }
+        else if (orders.size() == 3){
+            for (int i = 0; i <= orders[0]; ++i){
+                out << "Slice " << i << ":\n";
+                for (int j = 0; j <= orders[1]; ++j){
+                    for (int k = 0; k < orders[2]; ++k)
+                        fmt(coeffs[idx++]);
+                    out << "\n";
+                }
+                out << "\n";
+            }
         }
     }
 

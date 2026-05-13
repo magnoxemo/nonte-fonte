@@ -49,16 +49,9 @@ int main() {
 
     std::cout << "\n";
 
-
-    // write co-efficients in csv
-    std::ofstream file("domain_decomposition_results.csv");
-    for (const auto& tally:tallies){
-        for (auto co_eff:tally.coefficients()) {
-            file << co_eff << ",";
-        }
-        file<<"\n";
-    }
-    file.close();
+    std::ofstream file("domain_decomposition_results.txt");
+    for (auto tally: tallies)
+        nonte_fonte::WriteLegendreOutput(file, tally);
 
     return 0;
 }
