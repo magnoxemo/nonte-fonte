@@ -4,291 +4,167 @@ This script is generate by Chatgpt
 Generalized plotting utilities for nonte-fonte (local_fet) C++ library results.
 """
 
+#!/usr/bin/env bash
 import numpy as np
 import matplotlib.pyplot as plt
-import pandas as pd
-from typing import Optional, List, Callable
-import os
+import argparse
+from numpy.polynomial.legendre import legval
 
 
-def plot_1d_results(csv_file: str,
-                    title: str = "1D FET Results",
-                    figsize: tuple = (10, 6),
-                    save_name: Optional[str] = None):
+# ----------------------------
+# Domain mapping
+# ----------------------------
+def map_to_reference(x, a, b):
+    return (2.0 * x - (a + b)) / (b - a)
+
+
+# ----------------------------
+# Legendre reconstruction
+# ----------------------------
+def reconstruct_1d(x, coeffs, domain):
+    x0, x1 = domain
+    xi = map_to_reference(x, x0, x1)
+    return legval(xi, coeffs)
+
+
+def reconstruct_2d(x, y, coeffs, domain):
+    x0, x1, y0, y1 = domain
+    xi = map_to_reference(x, x0, x1)
+    eta = map_to_reference(y, y0, y1)
+
+    Nx, Ny = coeffs.shape
+
+    val = 0.0
+    for i in range(Nx):
+        Pi = legval(xi, [0]*i + [1])
+        for j in range(Ny):
+            Pj = legval(eta, [0]*j + [1])
+            val += coeffs[i, j] * Pi * Pj
+
+    return val
+
+
+# ----------------------------
+# Parsing FET output
+# ----------------------------
+def parse_fet_file(filename, is_2d=True, nx=None, ny=None):
     """
-    Plot 1D results from CSV file.
+    Expected format:
 
-    Expected columns: x, true_pdf, [tally_0, tally_1, ...]
+    Domain = x0, x1, y0, y1   (or x0, x1)
+    coeff rows...
+
+    Returns list of (domain, coeffs)
     """
-    df = pd.read_csv(csv_file)
+    blocks = []
 
-    fig, (ax1, ax2) = plt.subplots(2, 1, figsize=figsize, sharex=True)
+    with open(filename, "r") as f:
+        lines = f.readlines()
 
-    # Plot PDFs
-    ax1.plot(df['x'], df['true_pdf'], 'k-', linewidth=2, label='True PDF', alpha=0.7)
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
 
-    # Plot tallies
-    tally_cols = [col for col in df.columns if col.startswith('tally_')]
-    colors = plt.cm.tab10(np.linspace(0, 1, len(tally_cols)))
+        if line.startswith("Domain"):
+            parts = line.replace("Domain =", "").split(",")
 
-    for i, col in enumerate(tally_cols):
-        # Only plot non-zero values
-        mask = df[col] != 0.0
-        if mask.any():
-            ax1.plot(df[mask]['x'], df[mask][col], '--',
-                     color=colors[i], linewidth=2, label=col.replace('_', ' ').title())
+            if is_2d:
+                x0, x1, y0, y1 = map(float, parts)
+                domain = (x0, x1, y0, y1)
+            else:
+                x0, x1 = map(float, parts)
+                domain = (x0, x1)
 
-    ax1.set_ylabel('PDF', fontsize=12)
-    ax1.set_title(title, fontsize=14, fontweight='bold')
-    ax1.legend(loc='best', fontsize=10)
-    ax1.grid(True, alpha=0.3)
+            i += 1
+            coeffs = []
 
-    # Plot errors
-    for i, col in enumerate(tally_cols):
-        mask = df[col] != 0.0
-        if mask.any():
-            error = df[mask]['true_pdf'] - df[mask][col]
-            ax2.plot(df[mask]['x'], error, '-', color=colors[i],
-                     linewidth=1.5, label=col.replace('_', ' ').title())
+            while i < len(lines) and not lines[i].startswith("Domain"):
+                row = lines[i].strip().replace(",", "")
+                if row:
+                    coeffs.extend([float(v) for v in row.split()])
+                i += 1
 
-    ax2.axhline(0, color='k', linestyle='-', linewidth=1, alpha=0.5)
-    ax2.set_xlabel('x', fontsize=12)
-    ax2.set_ylabel('Error', fontsize=12)
-    ax2.set_title('Reconstruction Error', fontsize=12)
-    ax2.legend(loc='best', fontsize=10)
-    ax2.grid(True, alpha=0.3)
+            coeffs = np.array(coeffs)
 
+            if is_2d:
+                if nx is None or ny is None:
+                    raise ValueError("nx, ny must be provided for 2D case")
+                coeffs = coeffs.reshape(nx, ny)
+
+            blocks.append((domain, coeffs))
+        else:
+            i += 1
+    return blocks
+
+def plot_1d(blocks, num_points=300):
+    plt.figure()
+
+    for domain, coeffs in blocks:
+        x0, x1 = domain
+        x = np.linspace(x0, x1, num_points)
+
+        y = np.array([reconstruct_1d(xi, coeffs, (x0, x1)) for xi in x])
+
+        plt.plot(x, y, label=f"[{x0:.2f},{x1:.2f}]")
+
+    plt.title("FET Legendre Reconstruction (1D)")
+    plt.xlabel("x")
+    plt.ylabel("f(x)")
+    plt.grid(True)
+    plt.legend()
     plt.tight_layout()
-
-    if save_name:
-        plt.savefig(save_name, dpi=300, bbox_inches='tight')
-        print(f"Plot saved to {save_name}")
-
     plt.show()
 
 
-def plot_2d_results(csv_file: str,
-                    title: str = "2D FET Results",
-                    figsize: tuple = (14, 5),
-                    save_name: Optional[str] = None):
-    """
-    Plot 2D results from CSV file.
+def plot_2d(blocks, num_points=60):
+    for domain, coeffs in blocks:
+        x0, x1, y0, y1 = domain
 
-    Expected columns: x, y, true_pdf, [legendre_pdf, ...]
-    """
-    df = pd.read_csv(csv_file)
+        x = np.linspace(x0, x1, num_points)
+        y = np.linspace(y0, y1, num_points)
 
-    # Pivot for contour plots
-    x_unique = np.sort(df['x'].unique())
-    y_unique = np.sort(df['y'].unique())
+        X, Y = np.meshgrid(x, y)
+        Z = np.zeros_like(X)
 
-    X, Y = np.meshgrid(x_unique, y_unique)
-    Z_true = df.pivot(index='y', columns='x', values='true_pdf').values
+        for i in range(num_points):
+            for j in range(num_points):
+                Z[j, i] = reconstruct_2d(X[j, i], Y[j, i], coeffs, domain)
 
-    # Find reconstruction columns
-    recon_cols = [col for col in df.columns if col.endswith('_pdf') and col != 'true_pdf']
-
-    n_plots = 1 + len(recon_cols)
-    fig, axes = plt.subplots(1, n_plots, figsize=figsize)
-
-    if n_plots == 1:
-        axes = [axes]
-
-    # True PDF
-    im = axes[0].contourf(X, Y, Z_true, levels=20, cmap='viridis')
-    axes[0].set_title('True PDF', fontsize=12, fontweight='bold')
-    axes[0].set_xlabel('x')
-    axes[0].set_ylabel('y')
-    plt.colorbar(im, ax=axes[0])
-
-    # Reconstructions
-    for i, col in enumerate(recon_cols, 1):
-        Z_recon = df.pivot(index='y', columns='x', values=col).values
-        im = axes[i].contourf(X, Y, Z_recon, levels=20, cmap='viridis')
-        axes[i].set_title(col.replace('_', ' ').title(), fontsize=12, fontweight='bold')
-        axes[i].set_xlabel('x')
-        axes[i].set_ylabel('y')
-        plt.colorbar(im, ax=axes[i])
-
-    plt.suptitle(title, fontsize=14, fontweight='bold')
-    plt.tight_layout()
-
-    if save_name:
-        plt.savefig(save_name, dpi=300, bbox_inches='tight')
-        print(f"Plot saved to {save_name}")
-
-    plt.show()
+        plt.figure()
+        plt.contourf(X, Y, Z, levels=30)
+        plt.colorbar()
+        plt.title(f"FET Cell [{x0},{x1}] x [{y0},{y1}]")
+        plt.xlabel("x")
+        plt.ylabel("y")
+        plt.tight_layout()
+        plt.show()
 
 
-def compute_statistics(csv_file: str, tally_columns: Optional[List[str]] = None):
-    """
-    Compute and print statistics for tally results.
+# ----------------------------
+# CLI
+# ----------------------------
+def main():
+    parser = argparse.ArgumentParser(description="FET Legendre reconstruction plotter")
 
-    Computes L2 error, max error, RMS error for each tally.
-    """
-    df = pd.read_csv(csv_file)
+    parser.add_argument("file", type=str, help="FET output text file")
+    parser.add_argument("--dim", type=int, default=2, choices=[1, 2], help="Dimension: 1 or 2")
+    parser.add_argument("--nx", type=int, default=None, help="Legendre order x (2D only)")
+    parser.add_argument("--ny", type=int, default=None, help="Legendre order y (2D only)")
+    parser.add_argument("--points", type=int, default=80, help="Resolution")
 
-    if tally_columns is None:
-        tally_columns = [col for col in df.columns if col.startswith('tally_')]
+    args = parser.parse_args()
 
-    print("\n" + "="*60)
-    print("RECONSTRUCTION STATISTICS")
-    print("="*60)
+    if args.dim == 1:
+        blocks = parse_fet_file(args.file, is_2d=False)
+        plot_1d(blocks, num_points=args.points)
 
-    for col in tally_columns:
-        # Only compute for non-zero values
-        mask = df[col] != 0.0
-        if not mask.any():
-            continue
+    else:
+        if args.nx is None or args.ny is None:
+            raise ValueError("For 2D, you must specify --nx and --ny")
 
-        error = df[mask]['true_pdf'] - df[mask][col]
-
-        # Compute metrics
-        l2_error = np.sqrt(np.mean(error**2))
-        max_error = np.max(np.abs(error))
-        mean_error = np.mean(error)
-
-        print(f"\n{col.replace('_', ' ').title()}:")
-        print(f"  L2 Error:      {l2_error:.6e}")
-        print(f"  Max Error:     {max_error:.6e}")
-        print(f"  Mean Error:    {mean_error:.6e}")
-        print(f"  RMS Error:     {l2_error:.6e}")
-
-    print("\n" + "="*60)
-
-
-def plot_histogram_results(csv_file: str,
-                           figsize: tuple = (12, 5),
-                           save_name: Optional[str] = None):
-    """
-    Plot histogram and FET comparison.
-
-    Expected columns: x, true_pdf, histogram, [tally1, tally2, ...]
-    """
-    df = pd.read_csv(csv_file)
-
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=figsize)
-
-    # Left: PDFs
-    ax1.plot(df['x'], df['true_pdf'], 'k-', linewidth=2, label='True PDF', alpha=0.7)
-
-    if 'histogram' in df.columns:
-        ax1.step(df['x'], df['histogram'], 'r-', linewidth=1.5,
-                 where='mid', label='Histogram', alpha=0.7)
-
-    tally_cols = [col for col in df.columns
-                  if col.startswith('tally') and col != 'histogram']
-    colors = plt.cm.tab10(np.linspace(0, 1, len(tally_cols)))
-
-    for i, col in enumerate(tally_cols):
-        mask = df[col] != 0.0
-        if mask.any():
-            ax1.plot(df[mask]['x'], df[mask][col], '--',
-                     color=colors[i], linewidth=2, label=col.replace('_', ' ').title())
-
-    ax1.set_xlabel('x', fontsize=12)
-    ax1.set_ylabel('PDF', fontsize=12)
-    ax1.set_title('PDF Comparison', fontsize=14, fontweight='bold')
-    ax1.legend(loc='best')
-    ax1.grid(True, alpha=0.3)
-
-    # Right: Errors
-    if 'histogram' in df.columns:
-        hist_error = df['true_pdf'] - df['histogram']
-        ax2.plot(df['x'], hist_error, 'r-', linewidth=1.5,
-                 label='Histogram Error', alpha=0.7)
-
-    for i, col in enumerate(tally_cols):
-        mask = df[col] != 0.0
-        if mask.any():
-            error = df[mask]['true_pdf'] - df[mask][col]
-            ax2.plot(df[mask]['x'], error, '-', color=colors[i],
-                     linewidth=1.5, label=f"{col} Error")
-
-    ax2.axhline(0, color='k', linestyle='-', linewidth=1, alpha=0.5)
-    ax2.set_xlabel('x', fontsize=12)
-    ax2.set_ylabel('Error', fontsize=12)
-    ax2.set_title('Reconstruction Error', fontsize=14, fontweight='bold')
-    ax2.legend(loc='best')
-    ax2.grid(True, alpha=0.3)
-
-    plt.tight_layout()
-
-    if save_name:
-        plt.savefig(save_name, dpi=300, bbox_inches='tight')
-        print(f"Plot saved to {save_name}")
-
-    plt.show()
-
-
-def plot_convergence(csv_files: List[str],
-                     labels: List[str],
-                     figsize: tuple = (10, 6),
-                     save_name: Optional[str] = None):
-    """
-    Plot convergence study from multiple CSV files.
-
-    Each CSV should have x, true_pdf, and tally columns.
-    """
-    fig, ax = plt.subplots(figsize=figsize)
-
-    errors = []
-
-    for csv_file, label in zip(csv_files, labels):
-        df = pd.read_csv(csv_file)
-        tally_col = [col for col in df.columns if col.startswith('tally_')][0]
-
-        mask = df[tally_col] != 0.0
-        if mask.any():
-            error = df[mask]['true_pdf'] - df[mask][tally_col]
-            l2_error = np.sqrt(np.mean(error**2))
-            errors.append(l2_error)
-
-    ax.semilogy(labels, errors, 'o-', linewidth=2, markersize=8)
-    ax.set_xlabel('Configuration', fontsize=12)
-    ax.set_ylabel('L2 Error', fontsize=12)
-    ax.set_title('Convergence Study', fontsize=14, fontweight='bold')
-    ax.grid(True, alpha=0.3)
-
-    plt.tight_layout()
-
-    if save_name:
-        plt.savefig(save_name, dpi=300, bbox_inches='tight')
-        print(f"Plot saved to {save_name}")
-
-    plt.show()
-
-
-# Quick use functions
-def quick_plot_1d(csv_file: str):
-    """Quick 1D plot with auto-naming"""
-    base_name = os.path.splitext(csv_file)[0]
-    plot_1d_results(csv_file, save_name=f"{base_name}_plot.png")
-    compute_statistics(csv_file)
-
-
-def quick_plot_2d(csv_file: str):
-    """Quick 2D plot with auto-naming"""
-    base_name = os.path.splitext(csv_file)[0]
-    plot_2d_results(csv_file, save_name=f"{base_name}_plot.png")
+        blocks = parse_fet_file(args.file, is_2d=True, nx=args.nx, ny=args.ny)
+        plot_2d(blocks, num_points=args.points)
 
 
 if __name__ == "__main__":
-    import sys
-
-    if len(sys.argv) < 2:
-        print("Usage: python plotting_utilities.py <csv_file>")
-        print("  Automatically detects 1D or 2D and plots accordingly")
-        sys.exit(1)
-
-    csv_file = sys.argv[1]
-
-    # Auto-detect 1D or 2D
-    df = pd.read_csv(csv_file)
-
-    if 'y' in df.columns:
-        print("Detected 2D data")
-        quick_plot_2d(csv_file)
-    else:
-        print("Detected 1D data")
-        quick_plot_1d(csv_file)
+    main()
